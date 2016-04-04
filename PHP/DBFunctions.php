@@ -168,15 +168,77 @@ function takenCore($sid){
     $taken += QueryDB($query2, 2); // Just need it to exist.
     return $taken;
 }
+
+function addClass($sid, $cid, $grade, $semID, $yearID, $secID){
+$query =
+"SELECT CID
+ FROM (SELECT prerequisite.PCID AS pRID
+ FROM courses, prerequisite
+ WHERE prerequisite.CID = courses.CID AND
+	courses.CID = '$cid') AS SQ1, courses
+ WHERE courses.CID = pRID";
+
+ $result = QueryDB($query, 3);
+
+ $numRows = mysqli_num_rows($result); // Check if the prereq exists.
+ $preReqMet = True;
+ if( $numRows ){ // Not sure of the need for the grade in the prereq to register.
+ 	$pRID = mysqli_fetch_array($result)['CID'];
+
+  	$query =
+ 	"SELECT grade 
+ 	 FROM enrollment, students
+ 	 WHERE enrollment.SID = students.SID AND students.SID = $sid AND enrollment.CID = $pRID"; 
+
+ 	$result = QueryDB($query, 3);
+ 	$numRows = mysqli_num_rows($result);
+ 	if($numRows){
+ 		echo ""; // Do nothing for now.
+ 		// Don't know if the only prereq is finding out if the course has
+ 		// been taken before, and not adherence to the grade reveived.
+ 	} else // NumRows is 0, so they have not taken this course yet.
+ 		$preReqMet = False;
+ }
+
+ if(!$preReqMet)
+ 	return False; // Do not attempt to insert the course, just return false.
+ 
+ // Not checking for if the course exists already, but not too sure on what else. 
+ echo $sid."  ".$cid."<br>";
+ $query = 
+ "SELECT grade 
+ FROM enrollment, students
+ WHERE students.SID = $sid AND students.SID = enrollment.SID AND enrollment.CID = $cid";
+
+ $taken = QueryDB($query, 2); // Should I insert or update.
+ 
+ if($taken){
+ 	$query = 
+ 	"UPDATE enrollment
+ 	SET grade=$grade, semesterID = $semID, yearID = $yearID
+ 	WHERE CID = $cid AND SID = $sid
+ 	";
+ } else
+ 	$query =
+ 	"INSERT INTO enrollment
+  	(CID, SecID, semesterID, SID, yearID, grade)
+  	VALUES
+  	('$cid', '$secID', '$semID', '$sid', '$yearID', '$grade')";	
+
+  $resutl = QueryTF($query);
+
+  return $result;  
+}
 ?>
 
 <!-- 
 Non directly Query Based Functions. The ones that use the Queries above.
 -->
 <?php
+//	addClass(11,915450,1990,1990);
 	$i = 1010100;
 	while($i <= 1010110){
-	canIGraduate($i);
+	addClass($i,915450,1990,1990,99,99);//canIGraduate($i);
 	$i++;
 	}
 ?>
