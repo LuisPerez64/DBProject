@@ -238,7 +238,7 @@ Non directly Query Based Functions. The ones that use the Queries above.
 //	addClass(11,915450,1990,1990);
 	$i = 1010100;
 	while($i <= 1010110){
-	addClass($i,915450,1990,1990,99,99);//canIGraduate($i);
+	addClass($i,915450,0,0,9,'Lo');//canIGraduate($i);
 	$i++;
 	}
 ?>
