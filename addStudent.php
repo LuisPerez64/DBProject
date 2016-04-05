@@ -2,7 +2,8 @@
 define('__ROOT__', dirname(__FILE__));
 require_once(__ROOT__.'/PHP/DBFunctions.php');
 ?>
-
+	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+	<link rel="stylesheet" type="text/css" href="bluebliss.css" />
 <!--
 Adds a student to the given Database. Base Format
 Takes in the students basic Information, the SID is internally

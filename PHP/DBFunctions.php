@@ -1,6 +1,14 @@
 <?php
 // Gateway to the DB. Returns the result of the query that is done. 
+function debug_to_console( $data ) {
 
+    if ( is_array( $data ) )
+        $output = "<script>console.log( 'Debug Objects: " . implode( ',', $data) . "' );</script>";
+    else
+        $output = "<script>console.log( 'Debug Objects: " . $data . "' );</script>";
+
+    echo $output;
+}
 //Handles INSERT, UPDATE, DELETE, DROP, EXISTS which result in T/F Returns
 function QueryTF($query) {
 	//Set up a connection to the given DB
@@ -64,9 +72,11 @@ function addStudent($_name,$_sid,$_iid,$_major, $_career, $_degreeHeld){
 	$query = "INSERT INTO students (SID, name, IID, major, degreeHeld, career)
     	VALUES('$_sid', '$_name', '$_iid', '$_major', '$_degreeHeld', '$_career')";
    // Test to see if the SID is already in the DB, it is the main Key no duplicates.
-   if(!mysqli_num_rows(QueryDB($_query, 2)))
+    	echo "here";
+   if(QueryDB($_query, 2)){
+
 	   return QueryTF($query);
-	else
+	}else
 		return 0;	
 }	
 
@@ -74,10 +84,11 @@ function addStudent($_name,$_sid,$_iid,$_major, $_career, $_degreeHeld){
 // code is going to kill me here...
 function getAnElt($choice){
 	if( $choice == 1){
-		$query = "SELECT IID, COUNT(DISTINCT SID)
-	FROM students
-	GROUP BY IID
-	LIMIT 1;
+		$query = "SELECT IID, COUNT(DISTINCT SID) as totalStudents
+    FROM students
+    GROUP BY IID
+    ORDER BY totalStudents ASC
+    LIMIT 1;
 	";
 	} else if ($choice == 2){
 		$query = "SELECT SID
@@ -91,15 +102,27 @@ function getAnElt($choice){
 		$result++;
 	return $result;
 }
+
 function canIGraduate($sid){
 	$sidArray = studentGPA($sid);
-	if($sidArray['totalCredits'] >= 30) 
-		if($sidArray['coreTaken'] >=4) // If this and above met, 12 Credits / 18 Credits satisfied.
-			if($sidArray['GPA'] >= 3.0)
+	$returnArray = array(
+		'canI' => False,
+		'reason' => -1);
+	$reason = 0;
+	if($sidArray['totalCredits'] >= 30){ 
+		$reason++;
+		if($sidArray['coreTaken'] >=4){ // If this and above met, 12 Credits / 18 Credits satisfied.
+			$reason++;
+			if($sidArray['GPA'] >= 3.0){
+				$reason++;
 				if($sidArray['lessThanBCount'] <= 2)
-					echo "Fuck Yeah, I think. Just have to check prereqs.";
+					$returnArray['canI'] = True;
+			}		
+		}					
+	}
+	$returnArray['reason'] = $reason;
+	return $returnArray;
 }
-
 function getGrades($sid){
 $query = "SELECT enrollment.grade as 'Grade', courses.groupID as 'GID', courses.credits as 'Credits'
  FROM students, enrollment, courses
@@ -234,11 +257,3 @@ $query =
 <!-- 
 Non directly Query Based Functions. The ones that use the Queries above.
 -->
-<?php
-//	addClass(11,915450,1990,1990);
-	$i = 1010100;
-	while($i <= 1010110){
-	addClass($i,915450,0,0,9,'Lo');//canIGraduate($i);
-	$i++;
-	}
-?>

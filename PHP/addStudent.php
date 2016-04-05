@@ -1,4 +1,4 @@
-<?php
+<?php // Scrap the fancy stuff. Just go forth damnit -_-
 define('__ROOT__', dirname(__FILE__));
 require_once(__ROOT__.'/DBFunctions.php');
 ?>
@@ -43,8 +43,9 @@ echo
 		CLICK ME!!
 		</button>
 		<script type='text/javascript'>
-		document.getElementByID('RedirectWhere').onclick = function () {
-			location.href = $locationToRedirect;
+		document.getElementById('RedirectWhere').onclick = function () {
+			location.href = '$locationToRedirect';
+			console.log('Got here at least');
 		};
 		</script>
 	</html>
