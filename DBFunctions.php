@@ -101,24 +101,114 @@ function getAnElt($choice){
 	return $result;
 }
 
+function eligibleToGraduate($sid){ // Directly relayed to the user. Done here to not muddy up HTML Code more -_-
+	$ret = canIGraduate($sid);
+	if($ret['canI']){ // Student Can Graudate
+		$reason = "Student is eligible to graduate.";
+	}else {
+		switch($ret['reason']){
+			case 0:
+				$missingCredits = 30 - $ret['totalCredits'];
+				$reason = "Have not amassed needed total credits. Missing: $missingCredits credits";
+				break;
+			case 1:
+				$reason = 'Missing Core Courses. May need to speak with an Advisor';	
+				break;
+			case 2:
+				$gpa = $ret['GPA'];
+				$reason = "GPA is Below the one needed to Graduate. Current: $gpa";
+				break;
+			case 3:
+				$lessThanBCount = $ret['lessThanBCount'];
+				$reason = "Too many courses with a below B Avg. Currently: $lessThanBCount";
+				break;
+			case 4:
+				$reason = "Student needs to take course(s) Listed:<br>";
+				foreach($ret['conditions'] as $value) { // Append the list of reasons.
+							$reason .= $value."<br>";
+				}	 	
+				break;
+			default:
+				$reason = "Unknown reason. The universe doesn't want this for you.";
+				break;
+		}
+		$reason = "<h4>Student is unable to Graduate</h4>".$reason;
+	}
+
+	echo $reason."<br><br>";
+	return $ret; // Just in case something else is needed. 
+}
+
+
 function canIGraduate($sid){
 	$sidArray = studentGPA($sid);
 	$returnArray = array(
 		'canI' => False,
-		'reason' => -1);
+		'reason' => -1,
+		'conditions' => array(),
+		'totalCredits' => $sidArray['totalCredits'],
+		'GPA' =>$sidArray['GPA'],
+		'lessThanBCount' => $sidArray['lessThanBCount']);
+	$conditionsMet = checkConditions($sid);	
 	$reason = 0;
+
 	if($sidArray['totalCredits'] >= 30){ 
 		$reason++;
 		if($sidArray['coreTaken'] >=4){ // If this and above met, 12 Credits / 18 Credits satisfied.
 			$reason++;
 			if($sidArray['GPA'] >= 3.0){
 				$reason++;
-				if($sidArray['lessThanBCount'] <= 2) // Add conditions met search
-					$returnArray['canI'] = True;
+				if($sidArray['lessThanBCount'] <= 2){
+					$reason++; 
+					if($conditionsMet['met'])
+						$returnArray['canI'] = True;
+				}
 			}		
 		}					
 	}
 	$returnArray['reason'] = $reason;
+	$returnArray['conditions'] = $conditionsMet['classesMissing'];
+	return $returnArray;
+}
+
+function checkConditions($sid){
+// Validate the condition exists.
+	$returnArray = array(
+		'met' => True,
+		'classesMissing' => array());
+
+	$query = 
+	"SELECT * 
+	FROM students, conditions
+	WHERE students.SID = conditions.SID AND students.SID = $sid;  
+	";
+	$conditionsExist = QueryDB($query, 3);
+	if(mysqli_num_rows($conditionsExist)) { // The conditions exist in the DB
+		// Check that the conditions have been met.
+
+		while($row = mysqli_fetch_array($conditionsExist)){
+			$checkIfTaken = $row['CID'];
+			$query = 
+			"SELECT * FROM students, enrollment
+			WHERE enrollment.SID = students.SID AND 
+				  students.SID = $sid AND enrollment.CID = $checkIfTaken
+			";
+			$taken = QueryDB($query, 3);
+			if(!mysqli_num_rows($taken)){ // Student did not yet take the course
+				$query = 
+				"SELECT name
+				FROM courses
+				WHERE CID = $checkIfTaken;
+				";
+				$taken = QueryDB($query, 3);
+				$name = mysqli_fetch_array($taken)['name'];
+
+				$returnArray['classesMissing'][]= $name; // Push the name to the returned Array
+				$returnArray['met'] = False; // They have not met the conditions 	
+			}
+		}
+	} 
+
 	return $returnArray;
 }
 function getGrades($sid){
@@ -131,14 +221,21 @@ $query = "SELECT enrollment.grade as 'Grade', courses.groupID as 'GID', courses.
   return QueryDB($query, 3);
 }
 //Pivotal Function. Determines a lot of the graduation points.
-function studentGPA($sid){
+function letterToNum($letterGrade){
 	$gradeMap = array('A'  => 4.0, 'A-' => 3.7,
 					  'B+' => 3.3, 'B'  => 3.0, 'B-' => 2.7,
 					  'C+' => 2.3, 'C'  => 2.0, 'C-' => 1.7,
 					  'D+' => 1.3, 'D'  => 1.0,
 					  'F' => 0);
 
-
+	return $gradeMap[$letterGrade];				  	
+}
+function studentGPA($sid){
+	$gradeMap = array('A'  => 4.0, 'A-' => 3.7,
+					  'B+' => 3.3, 'B'  => 3.0, 'B-' => 2.7,
+					  'C+' => 2.3, 'C'  => 2.0, 'C-' => 1.7,
+					  'D+' => 1.3, 'D'  => 1.0,
+					  'F' => 0);
 	$return = array('GPA' => 0, 'lessThanBCount' => 0, 'totalCredits' => 0, 'letterGrade' => '', 'coreTaken' => 0);
 
 // Assumes the SID exists. Done elsewhere.
@@ -148,7 +245,7 @@ function studentGPA($sid){
 		$letterGrade = $filterMe['Grade'];
 		$group = $filterMe['GID'];
 		$credits = $filterMe['Credits'];
-		$grade = $gradeMap[$letterGrade];
+		$grade = letterToNum($letterGrade);
 		if ($grade < 3.0)
 			$return['lessThanBCount']++;
 		if ($group != 0){
@@ -161,14 +258,15 @@ function studentGPA($sid){
 	if($return['totalCredits'] != 0)
 		$return['GPA'] = ($QP/$return['totalCredits']);
 
-	//Assumes preserved Order.
+	//Assumes preserved Order. A, A- , B+ ...
 	foreach (array_reverse($gradeMap) as $key => $value) {
 		if ($return['GPA'] > $value)
 			$return['letterGrade'] = $key; 
 	}
+
 	$return['coreTaken'] = takenCore($sid);
-	echo $return['GPA']."<br>";
-	echo $return['letterGrade']."  ".$return['totalCredits']."<br>";
+//	echo $return['GPA']."<br>";
+//	echo $return['letterGrade']."  ".$return['totalCredits']."<br>";
 	return $return;
 }
 

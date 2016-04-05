@@ -26,7 +26,7 @@ require_once('./DBFunctions.php');
           <div id="header"></div>
           <div class="contentTitle">Register A Student</div>
             <div class="pageContent">
-              <form action="./addStudent.php" method="post">
+              <form action="./insertStudentHelper.php" method="post">
       <!--
       Dictates a table object. Explicitly defines its body, as well as the inputs for its fields.
       -->
