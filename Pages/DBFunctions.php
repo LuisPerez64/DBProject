@@ -113,7 +113,7 @@ function canIGraduate($sid){
 			$reason++;
 			if($sidArray['GPA'] >= 3.0){
 				$reason++;
-				if($sidArray['lessThanBCount'] <= 2)
+				if($sidArray['lessThanBCount'] <= 2) // Add conditions met search
 					$returnArray['canI'] = True;
 			}		
 		}					
@@ -167,7 +167,7 @@ function studentGPA($sid){
 			$return['letterGrade'] = $key; 
 	}
 	$return['coreTaken'] = takenCore($sid);
-	echo $return['coreTaken'];
+	echo $return['GPA']."<br>";
 	echo $return['letterGrade']."  ".$return['totalCredits']."<br>";
 	return $return;
 }
@@ -225,7 +225,7 @@ $query =
  	return False; // Do not attempt to insert the course, just return false.
  
  // Not checking for if the course exists already, but not too sure on what else. 
- echo $sid."  ".$cid."<br>";
+ //echo $sid."  ".$cid."<br>";
  $query = 
  "SELECT grade 
  FROM enrollment, students

@@ -1,55 +1,83 @@
-<?php // Scrap the fancy stuff. Just go forth damnit -_-
-define('__ROOT__', dirname(__FILE__));
-require_once(__ROOT__.'/DBFunctions.php');
-?>
-
 <?php
-// Get the data that was relayed. Place it where it needs to be.
-$_name = $_POST['_name'];
-$_sid = $_POST['_sid'];
-$_iid = $_POST['_iid'];
-$_major = $_POST['_major'];
-$_degreeHeld = $_POST['_degreeHeld'];
-$_career = $_POST['_career'];
-
-$didIAdd = addStudent($_name,$_sid,$_iid,$_major, $_career, $_degreeHeld);
-
-$title = "<title>";
-$body = "<body>";
-
-if(!$didIAdd){
-	$title = $title."Was Unable to Add Student. Unique SID Needed.";
-	$body =$body."\n<h1>Was Unable to Add Student. Unique SID Needed.</h1>".
-	"<h2>Please Click Button Below to Return to addition page</h2>";
-	$locationToRedirect = dirname(__ROOT__)."/addStudent.php";
-}else {
-	$title = $title."Student Added Successfully.";
-	$body = $body."\n<h1>Student Added Successfully.</h1>".
-	"<h2>Click Button To go Back to Home page</h2>";
-	$locationToRedirect = __ROOT__."/addStudent.php";
-}
-$title = $title."</title>";
-$body = $body."\n</body>";
-
-
-echo 
-"
-	<html>
-		<head>	
-		$title
-		</head>
-		$body
-		<button id='RedirectWhere' class = 'float-left submit-button'>
-		CLICK ME!!
-		</button>
-		<script type='text/javascript'>
-		document.getElementById('RedirectWhere').onclick = function () {
-			location.href = '$locationToRedirect';
-			console.log('Got here at least');
-		};
-		</script>
-	</html>
-"
+define('__ROOT__', dirname(__FILE__));
+require_once(__ROOT__.'/PHP/DBFunctions.php');
 ?>
+	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+	<link rel="stylesheet" type="text/css" href="bluebliss.css" />
+<!--
+Adds a student to the given Database. Base Format
+Takes in the students basic Information, the SID is internally
+generated.
+-->
+<!--First Try at this HTML PHP Thing. Lets see. -->
+<html>
+	<head>
+		<title>Add A Student</title>
+	</head>
+	<body>
+		<h1>Add Student</h1>
+		<p>Adds a Student into the Given Database. Please add in specified fields.</p>
+		<p>Note, SID and IID pregenrated. Change at own Risks</p>
+		<!--Just signals which PHP Point to call when submit is hit -->
+		<form action="./PHP/addStudent.php" method="post">
+			<!--
+			Dictates a table object. Explicitly defines its body, as well as the inputs for its fields.
+			-->
+			<table border="10">
+				<tbody>
+					<tr>
+						<td>Name</td>
+						<td align="left">
+							<input type="text" name="_name" size="20" maxlength="20"/>
+						</td>
+					</tr>
+					<?php 
+					$__IID = getAnElt(1);
+					$__SID = getAnElt(2);
 
-
+					echo 
+					"
+					<tr>
+						<td>Student ID#</td>
+						<td align='left'>
+							<input type='text' name='_sid' size='20' maxlength='20' 
+							value = '$__SID'/>
+						</td>
+					</tr>
+					<tr>
+						<td>Advisor</td>
+						<td>
+							<input type='text' name='_iid' size='5' maxlength='5' 
+							value = '$__IID'/>
+						</td>
+					</tr>
+					";
+					?>
+					<tr>
+						<td>Major</td>
+						<td>
+							<input type="text" name="_major" size="5" maxlength="5"/>
+						</td>
+					</tr>
+					<tr>
+						<td>Degree Held</td>
+						<td>
+							<input type="text" name="_degreeHeld" size="20" maxlength="20"/>
+						</td>
+					</tr>
+					<tr>
+						<td>Scholastic Career</td>
+						<td>
+							<input type="text" name="_career" size="20" maxlength="20"/>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="5" align="center">
+							<input type="submit" value="Insert Student"/>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</form>
+	</body>
+</html>
