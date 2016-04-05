@@ -214,7 +214,8 @@ $query =
  	$result = QueryDB($query, 3);
  	$numRows = mysqli_num_rows($result);
  	if($numRows){
- 		echo ""; // Do nothing for now.
+ 		echo ""; // Do nothing for now. Leaving just in case something need
+ 		// be done.
  		// Don't know if the only prereq is finding out if the course has
  		// been taken before, and not adherence to the grade reveived.
  	} else // NumRows is 0, so they have not taken this course yet.
@@ -225,7 +226,7 @@ $query =
  	return False; // Do not attempt to insert the course, just return false.
  
  // Not checking for if the course exists already, but not too sure on what else. 
- echo $sid."  ".$cid."<br>";
+ //echo $sid."  ".$cid."<br>";
  $query = 
  "SELECT grade 
  FROM enrollment, students
