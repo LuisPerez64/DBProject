@@ -47,66 +47,56 @@ require_once('./DBFunctions.php');
 							$q = mysqli_fetch_array($result);
 							$name = $q['name']; $SID = $q['SID']; $IID = $q['IID']; $major = $q['major'];
 							$degreeHeld = $q['degreeheld']; $career = $q['career'];
-							echo"<h3>Displaying Information For $name</h3>";
-              eligibleToGraduate($sid); // Just testing for now. 
+							echo"<h4>Displaying Information For $name</h4>";
+              $gpa = eligibleToGraduate($sid); 
               echo"
-							<form action='./studentOperations.php'>
-								<table border='0'>
-									<tbody>
-										<tr>
-											<td>Name</td>
-											<td align='left'>
-												<input type='text' name='_name' size='20' maxlength='20'
-												value = '$name'/>
-											</td>
-										</tr>
-										<tr>
-											<td>Student ID#</td>
-											<td align='left'>
-												<input type='text' name='_sid' size='20' maxlength='20'
-												value = '$SID' readonly/>
-											</td>
-										</tr>
-										<tr>
-											<td>Advisor</td>
-											<td>
-												<input type='text' name='_iid' size='5' maxlength='5'
-												value = '$IID'/>
-											</td>
-										</tr>
-										<tr>
-											<td>Major</td>
-											<td>
-												<input type='text' name='_major' size='5' maxlength='5'
-												value = '$major'/>
-											</td>
-										</tr>
-										<tr>
-											<td>Degree Held</td>
-											<td>
-												<input type='text' name='_degreeHeld' size='20' maxlength='20'
-												value = '$degreeHeld'/>
-											</td>
-										</tr>
-										<tr>
-											<td>Scholastic Career</td>
-											<td>
-												<input type='text' name='_career' size='20' maxlength='20'
-												value = '$career'/>
-											</td>
-										</tr>
-										<tr>
-											<td colspan='5' align='center'>
-												<input type='submit' value='Return To Student Operations' />
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</form>";
+              <table style = 'width:50%'>
+                <tr>
+                  <th>Name</th>
+                  <td>$name</td>
+                </tr>
+                <tr>
+                  <th>Student ID#</th>
+                  <td>$SID</td>
+                </tr>
+                <tr>
+                  <th>GPA</th>
+                  <td>$gpa[letterGrade]: $gpa[GPA]</td>
+                </tr>
+                <tr>
+                  <th>Advisor</th>
+                  <td>$IID</td>
+                </tr>  
+                <tr>  
+                  <th>Major</th>
+                  <td>$major</td>
+                </tr>
+                <tr>
+                  <th>Degree Held</th>
+                  <td>$degreeHeld</td>
+                </tr>
+                <tr>
+                  <th>Scholastic Career</th>
+                  <td>$career</td>
+                </tr>
+              </table>
+              <button id = 'backToOps' class='float-left submit-button'>
+              Return To Student Operations
+              </button>
+
+              <script type='text/javascript'>
+              document.getElementById('backToOps').onclick = function () {
+                location.href = './studentOperations.php';
+              };
+              </script>
+              <br>";
+              // Attain the courses that PS has taken.
+              echo "<h4><br>$name's Scholastic Information</h4>";
+              gradeData($SID);
 							}
 						}else { // First Time Around ask for SID
 						echo "
-						<p>Please Input the Students ID# which you wish to alter the Data of.</p>
+						<p>Please Input the Students ID# which you wish to view the progress of</p>
 						<form action='./currentProgress.php' method = 'post'>
 							SID <input type='text' name='SID#'>
 							<br>

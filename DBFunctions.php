@@ -101,6 +101,42 @@ function getAnElt($choice){
 	return $result;
 }
 
+function gradeData($sid) {
+	$query = 
+	"SELECT courses.name as cName,  enrollment.SecID as secID, 
+			enrollment.grade as grade, enrollment.yearID as yearID, 
+			enrollment.semesterID as semID
+	FROM  students, enrollment, courses
+	WHERE enrollment.SID = students.SID AND enrollment.CID = courses.CID AND students.SID = $sid
+	ORDER BY yearID, semID,courses.CID";
+
+	$ret = QueryDB($query, 3);
+	$out = "
+	<table style='width:100%'>
+	<tr>
+		<th>Course Name</th>
+		<th>Grade</th>
+		<th>Year Taken</th>
+		<th>Semester</th>
+		<th>Section</th>
+	</tr>";
+	while ($row = mysqli_fetch_array($ret)){
+		$q = $row['cName']; $w = $row['grade']; $e = $row['yearID'];
+		$r = $row['semID']; $t = $row['secID'];
+		$out .= "
+		<tr>
+			<td>$q</td>
+			<td>$w</td>
+			<td>$e</td>
+			<td>$r</td>
+			<td>$t</td>
+		</tr>";
+	}
+	$out .= "</table>";
+	echo $out;
+
+}
+
 function eligibleToGraduate($sid){ // Directly relayed to the user. Done here to not muddy up HTML Code more -_-
 	$ret = canIGraduate($sid);
 	if($ret['canI']){ // Student Can Graudate
@@ -132,10 +168,10 @@ function eligibleToGraduate($sid){ // Directly relayed to the user. Done here to
 				$reason = "Unknown reason. The universe doesn't want this for you.";
 				break;
 		}
-		$reason = "<h4>Student is unable to Graduate</h4>".$reason;
+		$reason = "<b>Student is unable to Graduate</b><br>".$reason;
 	}
 
-	echo $reason."<br><br>";
+	echo $reason."<br>";
 	return $ret; // Just in case something else is needed. 
 }
 
@@ -148,7 +184,8 @@ function canIGraduate($sid){
 		'conditions' => array(),
 		'totalCredits' => $sidArray['totalCredits'],
 		'GPA' =>$sidArray['GPA'],
-		'lessThanBCount' => $sidArray['lessThanBCount']);
+		'lessThanBCount' => $sidArray['lessThanBCount'],
+		'letterGrade' => $sidArray['letterGrade']);
 	$conditionsMet = checkConditions($sid);	
 	$reason = 0;
 
@@ -236,7 +273,11 @@ function studentGPA($sid){
 					  'C+' => 2.3, 'C'  => 2.0, 'C-' => 1.7,
 					  'D+' => 1.3, 'D'  => 1.0,
 					  'F' => 0);
-	$return = array('GPA' => 0, 'lessThanBCount' => 0, 'totalCredits' => 0, 'letterGrade' => '', 'coreTaken' => 0);
+	$return = array('GPA' => 0, 
+		'lessThanBCount' => 0, 
+		'totalCredits' => 0, 
+		'letterGrade' => '', 
+		'coreTaken' => 0);
 
 // Assumes the SID exists. Done elsewhere.
 	$QP = 0;
@@ -345,7 +386,7 @@ $query =
   	VALUES
   	('$cid', '$secID', '$semID', '$sid', '$yearID', '$grade')";	
 
-  $resutl = QueryTF($query);
+  $result = QueryTF($query);
 
   return $result;  
 }
