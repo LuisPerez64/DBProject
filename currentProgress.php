@@ -49,6 +49,8 @@ require_once('./DBFunctions.php');
 							$degreeHeld = $q['degreeheld']; $career = $q['career'];
 							echo"<h4>Displaying Information For $name</h4>";
               $gpa = eligibleToGraduate($sid); 
+              $query = "SELECT name FROM instructors WHERE IID = $IID";
+              $advisor = QueryDB($query)[0];	
               echo"
               <table style = 'width:50%'>
                 <tr>
@@ -65,7 +67,7 @@ require_once('./DBFunctions.php');
                 </tr>
                 <tr>
                   <th>Advisor</th>
-                  <td>$IID</td>
+                  <td>$advisor</td>
                 </tr>  
                 <tr>  
                   <th>Major</th>

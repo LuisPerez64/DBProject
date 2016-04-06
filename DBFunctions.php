@@ -1,12 +1,12 @@
 <?php
-// Gateway to the DB. Returns the result of the query that is done. 
+ 
+// Helpful for error logging. Got this function from Stack OVerflow.
+// Allows direct output to the console for debugging reasons.
 function debug_to_console( $data ) {
-
     if ( is_array( $data ) )
         $output = "<script>console.log( 'Debug Objects: " . implode( ',', $data) . "' );</script>";
     else
         $output = "<script>console.log( 'Debug Objects: " . $data . "' );</script>";
-
     echo $output;
 }
 //Handles INSERT, UPDATE, DELETE, DROP, EXISTS which result in T/F Returns
@@ -25,11 +25,13 @@ function QueryTF($query) {
 	$result = mysqli_query($connect, $query) or 
 		die ('Query failed: '.mysql_error());
 
+		// Close off the connection to the DB.
+	mysqli_close($connect);	
 	// IS either true or False	
 	return $result;	
 }
 
-//Handles SELECT, SHOW, ... Only using Select
+//Handles SELECT, SHOW, ... Only using Select for now, but expansion
 function QueryDB($query, $type = 1) {
 	//Set up a connection to the given DB
 	$connect = mysqli_init();
@@ -45,6 +47,9 @@ function QueryDB($query, $type = 1) {
 	$result = mysqli_query($connect, $query) or 
 		die ('Query failed: '.mysql_error());
 	
+	// Close out the database.
+	mysqli_close($connect);
+	
 	// Edge Cases... Should just write a new one but -_-
 	// Was unable to find something at all. Query Failed.
 	if(!$result){
@@ -52,9 +57,10 @@ function QueryDB($query, $type = 1) {
 	} else if ($type == 2){ // Counting Rows from Select, still done in caller.
 		return mysqli_num_rows($result); // DOne to validate if PS exists. Only for one Query
 	} else if ($type == 3) { // getGrades Query. This is going to look really ugly after it all...
-		return $result;
+		return $result; // Main one that is used through this all. 
 	}
 
+	//Rarely get down here, but still used in some functions.
 	//Do with the results whatever needs to be done on the caller side.
 	$result2 = mysqli_fetch_array($result);
 	
@@ -78,8 +84,9 @@ function addStudent($_name,$_sid,$_iid,$_major, $_career, $_degreeHeld){
 		return 0;	
 }	
 
-//Works to get the first Elt of most any query that is done... Inefficient but reusablity of 
-// code is going to kill me here...
+//Helper function for the insertion of a student. Relays an Instructor
+// Based on the amount of students the instructor currently has, and 
+// also relays a new SID# 
 function getAnElt($choice){
 	if( $choice == 1){
 		$query = "SELECT IID, COUNT(DISTINCT SID) as totalStudents
@@ -101,6 +108,7 @@ function getAnElt($choice){
 	return $result;
 }
 
+// External call to print grade data of the user to the caller.
 function gradeData($sid) {
 	$query = 
 	"SELECT courses.name as cName,  enrollment.SecID as secID, 
@@ -134,9 +142,9 @@ function gradeData($sid) {
 	}
 	$out .= "</table>";
 	echo $out;
-
 }
 
+// External function to test graduation, and display that to the user.
 function eligibleToGraduate($sid){ // Directly relayed to the user. Done here to not muddy up HTML Code more -_-
 	$ret = canIGraduate($sid);
 	if($ret['canI']){ // Student Can Graudate
@@ -175,7 +183,8 @@ function eligibleToGraduate($sid){ // Directly relayed to the user. Done here to
 	return $ret; // Just in case something else is needed. 
 }
 
-
+// Main Function,  determines if a student is able to graduate. If not relays
+// The reason, if based on conditions, relays all the conditions that are not met.
 function canIGraduate($sid){
 	$sidArray = studentGPA($sid);
 	$returnArray = array(
@@ -208,6 +217,7 @@ function canIGraduate($sid){
 	return $returnArray;
 }
 
+// Used for the graduation check. More or less just returns if conditions set are met.
 function checkConditions($sid){
 // Validate the condition exists.
 	$returnArray = array(
@@ -248,6 +258,8 @@ function checkConditions($sid){
 
 	return $returnArray;
 }
+
+// Gets all of the grades that a student has gotten through their career.
 function getGrades($sid){
 $query = "SELECT enrollment.grade as 'Grade', courses.groupID as 'GID', courses.credits as 'Credits'
  FROM students, enrollment, courses
@@ -257,16 +269,20 @@ $query = "SELECT enrollment.grade as 'Grade', courses.groupID as 'GID', courses.
   // Grade, and GroupID returned
   return QueryDB($query, 3);
 }
-//Pivotal Function. Determines a lot of the graduation points.
+
+// Made external to make sure that the functionality is available anywhere.
 function letterToNum($letterGrade){
 	$gradeMap = array('A'  => 4.0, 'A-' => 3.7,
 					  'B+' => 3.3, 'B'  => 3.0, 'B-' => 2.7,
 					  'C+' => 2.3, 'C'  => 2.0, 'C-' => 1.7,
 					  'D+' => 1.3, 'D'  => 1.0,
-					  'F' => 0);
+					  'F' => 0, 'NA' => 0);
 
 	return $gradeMap[$letterGrade];				  	
 }
+
+// Relays the GPA that the student has amassed for their career.
+// Also relays most of the information that is needed to validate grad eligibility.
 function studentGPA($sid){
 	$gradeMap = array('A'  => 4.0, 'A-' => 3.7,
 					  'B+' => 3.3, 'B'  => 3.0, 'B-' => 2.7,
@@ -287,6 +303,9 @@ function studentGPA($sid){
 		$group = $filterMe['GID'];
 		$credits = $filterMe['Credits'];
 		$grade = letterToNum($letterGrade);
+		if($letterGrade == 'NA') // Do not count courses they haven't finished.
+			continue;
+			debug_to_console($letterGrade);
 		if ($grade < 3.0)
 			$return['lessThanBCount']++;
 		if ($group != 0){
@@ -311,6 +330,7 @@ function studentGPA($sid){
 	return $return;
 }
 
+// Simple function to return the amount of core courses(GID(1,2,3,4)) that student has taken.
 function takenCore($sid){
 	$query1 = 
 	"SELECT COUNT(DISTINCT courses.groupID) as coreTaken
@@ -329,6 +349,7 @@ function takenCore($sid){
     return $taken;
 }
 
+//Active class addition. Does not allow insertion if student has not met prereqs.
 function addClass($sid, $cid, $grade, $semID, $yearID, $secID, $noInsert = False){
 $query =
 "SELECT CID
@@ -377,8 +398,8 @@ $query =
  if($taken){
  	$query = 
  	"UPDATE enrollment
- 	SET grade=$grade, semesterID = $semID, yearID = $yearID
- 	WHERE CID = $cid AND SID = $sid
+ 	SET grade='$grade', semesterID = '$semID', yearID = '$yearID'
+ 	WHERE CID = '$cid' AND SID = '$sid'
  	";
  } else
  	$query =
@@ -387,12 +408,14 @@ $query =
   	VALUES
   	('$cid', '$secID', '$semID', '$sid', '$yearID', '$grade')";	
 
+echo $query;
   $result = QueryTF($query);
 
   return $result;  
 }
 
-function classesAvailable($sid){
+//Running into some simple conflicts. Will make better with time, all functions above work as needed.
+function classesAvailable($sid){ // Displays courses that the student can take for a given semester
 	// In HTML. Display see available classes for Year, Semester
 	$year = date('Y'); $month = date('n'); 
 	$sem='F'; // Display courses for fall semester of the given year.
@@ -404,16 +427,29 @@ function classesAvailable($sid){
 	}
 //No courses for fall of this year yet...
 	$sem = 'S';
+	if($sem == 'S'){
+		$semester = 'Spring';
+	}else
+		$semester = 'Fall';
+
+	// Attain courses student can take in the semester of choice.
 	$query = 
-	"SELECT courses.CID as CID, name, credits, groupID, secID, IID
-	FROM courses, section
-	WHERE courses.CID = section.CID AND yearID ='$year' AND 
-		semesterID = '$sem'
-	ORDER BY courses.CID
-	";
+	"SELECT DISTINCT courses.CID as CID, courses.name as name, credits,
+	 groupID, section.secID as secID, IID 
+	FROM courses, section, enrollment 
+	WHERE courses.CID = enrollment.CID AND section.CID = courses.CID AND 
+		enrollment.SID = '$sid' AND section.semesterID = '$sem' AND section.yearID = '$year' AND 
+	courses.CID NOT IN
+	(SELECT enrollment.CID as CID
+ 	FROM enrollment, students
+ 	WHERE enrollment.SID = students.SID AND enrollment.grade = 'A' AND students.SID = '$sid')
+	GROUP BY CID";
 
 	$ret = QueryDB($query, 3);
 	$out = "
+	<h2>Courses available for this student to take in $semester $year</h2>
+	<p>Note: If grade was not an A student may retake a course.</p>
+	<form action ='./enrollInCourseHelper.php' method='post'>
 	<table style='width:100%'>
 	<tr>
 		<th>Enroll</th>
@@ -422,29 +458,40 @@ function classesAvailable($sid){
 		<th>Section</th>
 		<th>Credits</th>
 		<th>Group ID</th>
-	</tr>";
+		<th>Professor</th>
+	</tr>
+	<input type='hidden' name='base' value='$sid'";
 
+//TODO:(Done) Only display courses that the student did not acquire an A in.
 	while ($row = mysqli_fetch_array($ret)){
 		$q = $row['name']; $w = $row['CID']; $e = $row['secID'];
-		$r = $row['credits']; $t = $row['groupID'];
+		$r = $row['credits']; $t = $row['groupID']; $y = $row['IID'];
+		$query = "SELECT name FROM instructors WHERE IID = $y";
+        $y = QueryDB($query)[0];
+        $row['SID'] = $sid; $row['SEM'] = $sem; $row['Year'] = $year;
+        $row['name'] = "'$row[name]'";
+		$send = base64_encode(serialize($row));
+
 		$out .= "
 		<tr>
-			<td><input type='checkbox' name=$w/>
+			<td><input type='checkbox' name='enroll[]' value=$send/>
 			<td>$q</td>
 			<td>$w</td>
 			<td>$e</td>
 			<td>$r</td>
 			<td>$t</td>
+			<td>$y</td>
 		</tr>";
 	}
-	$out .= "</table>";
+	$out .= 
+	"	<tr>
+			<td colspan='3' align='left'>
+				<input type ='submit' value='Enroll In Checked Courses.'/>
+			</td>
+		</tr>	
+	</table>
+	</form> ";
 	echo $out;
-	/*$res = QueryDB($query, 3);
-	while($row = mysqli_fetch_array($res)){
-		if(addClass($sid, $row['CID'], 0, $sem, $year, $row['secID'], True)){ // THe course can be taken.
-			echo $row['name']."<br>";
-		}
-	}*/
 }
 
 ?>
