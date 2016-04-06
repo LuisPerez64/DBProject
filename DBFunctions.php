@@ -329,7 +329,7 @@ function takenCore($sid){
     return $taken;
 }
 
-function addClass($sid, $cid, $grade, $semID, $yearID, $secID){
+function addClass($sid, $cid, $grade, $semID, $yearID, $secID, $noInsert = False){
 $query =
 "SELECT CID
  FROM (SELECT prerequisite.PCID AS pRID
@@ -361,8 +361,9 @@ $query =
  		$preReqMet = False;
  }
 
- if(!$preReqMet)
- 	return False; // Do not attempt to insert the course, just return false.
+// No Insert is for the displaying of courses student can take. Used by classes available.
+ if(!$preReqMet or $noInsert)
+ 	return $preReqMet; // Do not attempt to insert the course, just return false.
  
  // Not checking for if the course exists already, but not too sure on what else. 
  //echo $sid."  ".$cid."<br>";
@@ -390,7 +391,64 @@ $query =
 
   return $result;  
 }
+
+function classesAvailable($sid){
+	// In HTML. Display see available classes for Year, Semester
+	$year = date('Y'); $month = date('n'); 
+	$sem='F'; // Display courses for fall semester of the given year.
+	// Assumes last month to sign up for fall courses is october.
+	if($month >= 10) {
+	 // This would work, but there are no courses listed for fall yet 	
+		$year++; // Semester spring of next year.
+		$sem = 'S'; 
+	}
+//No courses for fall of this year yet...
+	$sem = 'S';
+	$query = 
+	"SELECT courses.CID as CID, name, credits, groupID, secID, IID
+	FROM courses, section
+	WHERE courses.CID = section.CID AND yearID ='$year' AND 
+		semesterID = '$sem'
+	ORDER BY courses.CID
+	";
+
+	$ret = QueryDB($query, 3);
+	$out = "
+	<table style='width:100%'>
+	<tr>
+		<th>Enroll</th>
+		<th>Course Name</th>
+		<th>Course ID#</th>
+		<th>Section</th>
+		<th>Credits</th>
+		<th>Group ID</th>
+	</tr>";
+
+	while ($row = mysqli_fetch_array($ret)){
+		$q = $row['name']; $w = $row['CID']; $e = $row['secID'];
+		$r = $row['credits']; $t = $row['groupID'];
+		$out .= "
+		<tr>
+			<td><input type='checkbox' name=$w/>
+			<td>$q</td>
+			<td>$w</td>
+			<td>$e</td>
+			<td>$r</td>
+			<td>$t</td>
+		</tr>";
+	}
+	$out .= "</table>";
+	echo $out;
+	/*$res = QueryDB($query, 3);
+	while($row = mysqli_fetch_array($res)){
+		if(addClass($sid, $row['CID'], 0, $sem, $year, $row['secID'], True)){ // THe course can be taken.
+			echo $row['name']."<br>";
+		}
+	}*/
+}
+
 ?>
+
 
 <!-- 
 Non directly Query Based Functions. The ones that use the Queries above.

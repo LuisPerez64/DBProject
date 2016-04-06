@@ -277,7 +277,7 @@ CID long,
 SecID int,
 IID int,
 yearID int,
-semesterID int
+semesterID varchar(2)
 );
 
 --

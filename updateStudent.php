@@ -27,7 +27,7 @@ require_once('./DBFunctions.php');
 						<?php
 						if (array_key_exists('SID#',$_POST)){
 							$sid = $_POST['SID#'];
-								$query = "Select * FROM students WHERE SID= $sid";
+							$query = "Select * FROM students WHERE SID= $sid";
 							$result = QueryDB($query, 3);
 							
 							if(!mysqli_num_rows($result)) {// Student Does not exists
