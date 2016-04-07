@@ -30,7 +30,7 @@ require_once('./DBFunctions.php');
       <!--
       Dictates a table object. Explicitly defines its body, as well as the inputs for its fields.
       -->
-      <table border="10">
+      <table border="1">
         <tbody>
           <tr>
             <td>Name</td>

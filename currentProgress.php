@@ -38,7 +38,7 @@ require_once('./DBFunctions.php');
 							</button>
 							<script type='text/javascript'>
 							document.getElementById('otherSID').onclick = function () {
-								location.href = './updateStudent.php';
+								location.href = './currentProgress.php';
 							};
 							</script>
 							";
@@ -50,7 +50,8 @@ require_once('./DBFunctions.php');
 							echo"<h4>Displaying Information For $name</h4>";
               $gpa = eligibleToGraduate($sid); 
               $query = "SELECT name FROM instructors WHERE IID = $IID";
-              $advisor = QueryDB($query)[0];	
+              $advisor = QueryDB($query)[0];
+              $p = number_format($gpa['GPA'],2); // Output normalized GPA	
               echo"
               <table style = 'width:50%'>
                 <tr>
@@ -63,7 +64,7 @@ require_once('./DBFunctions.php');
                 </tr>
                 <tr>
                   <th>GPA</th>
-                  <td>$gpa[letterGrade]: $gpa[GPA]</td>
+                  <td>$gpa[letterGrade]: $p </td>
                 </tr>
                 <tr>
                   <th>Advisor</th>

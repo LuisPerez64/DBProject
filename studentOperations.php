@@ -35,6 +35,9 @@
                 permission number.</p>
               <div class="links"><a href="enrollInCourse.php">Register Student In A Course</a></div>
               <br>
+              <p>Once the semester is over. Input the grades that the student attained for the courses taken</p>
+              <div class="links"><a href="insertGrades.php">Input Semester Grades</a></div>
+              <br>
               <!-- The ABout Us Tab is probably going to be removed. IDK what to place there-->
             </div>
             <div id="footer"><a href="http://www.aszx.net">Template Developed</a> by <a href="http://www.bryantsmith.com">bryant smith</a></div>

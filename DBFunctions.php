@@ -167,7 +167,7 @@ function eligibleToGraduate($sid){ // Directly relayed to the user. Done here to
 				$reason = "Too many courses with a below B Avg. Currently: $lessThanBCount";
 				break;
 			case 4:
-				$reason = "Student needs to take course(s) Listed:<br>";
+				$reason = "Unmet Conditions. Student needs to take course(s) Listed:<br>";
 				foreach($ret['conditions'] as $value) { // Append the list of reasons.
 							$reason .= $value."<br>";
 				}	 	
@@ -378,9 +378,9 @@ $query =
  		// be done.
  		// Don't know if the only prereq is finding out if the course has
  		// been taken before, and not adherence to the grade reveived.
- 	} else // NumRows is 0, so they have not taken this course yet.
+ 	} else //NumRows is 0, so they have not taken this course yet.
  		$preReqMet = False;
- }
+}	 
 
 // No Insert is for the displaying of courses student can take. Used by classes available.
  if(!$preReqMet or $noInsert)
@@ -394,11 +394,11 @@ $query =
  WHERE students.SID = $sid AND students.SID = enrollment.SID AND enrollment.CID = $cid";
 
  $taken = QueryDB($query, 2); // Should I insert or update.
- 
+
  if($taken){
  	$query = 
  	"UPDATE enrollment
- 	SET grade='$grade', semesterID = '$semID', yearID = '$yearID'
+ 	SET grade= 'NA', semesterID = '$semID', yearID = '$yearID'
  	WHERE CID = '$cid' AND SID = '$sid'
  	";
  } else
@@ -494,6 +494,84 @@ function classesAvailable($sid){ // Displays courses that the student can take f
 	echo $out;
 }
 
+// Updates the grades of the student for the set course.
+function updateGrades($sid, $cid, $grade){
+$query = 
+"UPDATE enrollment
+SET grade='$grade' 
+WHERE SID = $sid AND CID = $cid";
+
+return QueryTF($query);
+}
+
+//Displays the courseswith grades of NA, able to be retaken.
+function findRetakes($sid){
+	$query = 
+	"SELECT enrollment.cid as CID
+	FROM students, enrollment
+	WHERE enrollment.SID = students.SID AND students.SID = $sid
+	AND grade = 'NA'";
+
+	$gradesBox = "
+		<option value='NA'>NA</option>
+	 	<option value='A'>A</option>
+	 	<option value='A-'>A-</option>
+	 	<option value='B+'>B+</option>
+	 	<option value='B'>B</option>
+	 	<option value='B-'>B-</option>
+	 	<option value='C+'>C+</option>
+	 	<option value='C'>C</option>
+	 	<option value='C-'>C-</option>
+	 	<option value='D+'>D+</option>
+	 	<option value='D'>D</option>
+	 	<option value='D-'>D-</option>
+	 	<option value='F'>F</option>
+	 	</select>";
+
+	$res = QueryDB($query, 3);
+
+	$out = "";
+	$c = 1;
+	if(mysqli_num_rows($res)){
+		$out .= "<form action='./updateGradesHelper.php' method='post'>
+		<input type=hidden value='$sid' name ='SID'>
+		<table>
+		<th>Num</th>
+		<th>Course Name</th>
+		<th>New Grade</th>";
+		while($row = mysqli_fetch_array($res)){
+			$query = "SELECT name from courses where cid = '$row[CID]'";
+			$name = QueryDB($query)['name'];
+			$_gradesBox = "<select name='$row[CID]'>".$gradesBox;
+			$out .="
+			<tr>
+				<td>$c</td>
+				<td>$name</td>
+				<td>$_gradesBox</d>
+			</tr>";
+			$c++;
+		}
+		$out .="
+		<tr><td></td>
+			<td>
+			<input type ='submit' value='Change Course Grades'>
+			</td>
+		</tr>
+		</table>
+		</form>";
+	} else {
+		$out = "<h2>Student did not enroll in any courses this semester</h2>
+		<p>Redirection to Student Operations in 3 seconds.</p>
+		<script>
+		function wait3Secs(){
+			location.href = './studentOperations.php';
+		}
+		setTimeout(wait3Secs, 3000);
+		</script>";
+	}	
+
+	echo $out;
+}
 ?>
 
 
