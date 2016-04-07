@@ -275,7 +275,7 @@ function letterToNum($letterGrade){
 	$gradeMap = array('A'  => 4.0, 'A-' => 3.7,
 					  'B+' => 3.3, 'B'  => 3.0, 'B-' => 2.7,
 					  'C+' => 2.3, 'C'  => 2.0, 'C-' => 1.7,
-					  'D+' => 1.3, 'D'  => 1.0,
+					  'D+' => 1.3, 'D'  => 1.0, 'D-' => 0.7,
 					  'F' => 0, 'NA' => 0);
 
 	return $gradeMap[$letterGrade];				  	
@@ -287,7 +287,7 @@ function studentGPA($sid){
 	$gradeMap = array('A'  => 4.0, 'A-' => 3.7,
 					  'B+' => 3.3, 'B'  => 3.0, 'B-' => 2.7,
 					  'C+' => 2.3, 'C'  => 2.0, 'C-' => 1.7,
-					  'D+' => 1.3, 'D'  => 1.0,
+					  'D+' => 1.3, 'D'  => 1.0, 'D-' => 0.7,
 					  'F' => 0);
 	$return = array('GPA' => 0, 
 		'lessThanBCount' => 0, 
@@ -572,6 +572,34 @@ function findRetakes($sid){
 
 	echo $out;
 }
+
+// Outputs the grad students that are eligible to graduate. Allows them to be clickable and
+// links to the data.
+function whoCanGraduate(){
+	$query =
+	"SELECT sid, name 
+	From students";
+
+	//If they can graduate add them to the display.
+	$res=QueryDB($query, 3);
+
+	if(!mysqli_num_rows($res)){
+		echo "<h1>No one can graduate. Wow shame shame</h1>";	
+		return;
+	}
+
+	$out = "<form action='./currentProgress.php' method='post'>
+	";
+	while($row = mysqli_fetch_array($res)){
+		if(canIGraduate($row['sid'])['canI']){
+			$out .="<input type='radio' name='SID#' value='$row[sid]'><b>$row[name]</b><br>";
+		}
+	}
+	$out .= '<input type=submit value="View Student Data"/></form>';
+
+	echo $out;
+}
+
 ?>
 
 

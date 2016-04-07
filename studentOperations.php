@@ -14,7 +14,6 @@
             <div class="link"><a href="home.php">Home</a></div>
             <div class="link"><a href="studentOperations.php">Student Operations</a></div>
             <div class="link"><a href="graduationList.php">Grads List</a></div>
-            <div class="link"><a href="about.php">Lol</a></div>
         </div>
         
         <div id="blueBox"> 
