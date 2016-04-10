@@ -7,7 +7,7 @@ function debug_to_console( $data ) {
         $output = "<script>console.log( 'Debug Objects: " . implode( ',', $data) . "' );</script>";
     else
         $output = "<script>console.log( 'Debug Objects: " . $data . "' );</script>";
-    echo $output;
+   // echo $output;
 }
 //Handles INSERT, UPDATE, DELETE, DROP, EXISTS which result in T/F Returns
 function QueryTF($query) {
@@ -408,7 +408,6 @@ $query =
   	VALUES
   	('$cid', '$secID', '$semID', '$sid', '$yearID', '$grade')";	
 
-echo $query;
   $result = QueryTF($query);
 
   return $result;  
