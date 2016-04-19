@@ -147,39 +147,43 @@ function gradeData($sid) {
 // External function to test graduation, and display that to the user.
 function eligibleToGraduate($sid){ // Directly relayed to the user. Done here to not muddy up HTML Code more -_-
 	$ret = canIGraduate($sid);
+	$reason = '';
 	if($ret['canI']){ // Student Can Graudate
-		$reason = "Student is eligible to graduate.";
+		$reason = "Student is eligible to graduate.<br>";
 	}else {
-		switch($ret['reason']){
-			case 0:
-				$missingCredits = 30 - $ret['totalCredits'];
-				$reason = "Have not amassed needed total credits. Missing: $missingCredits credits";
-				break;
-			case 1:
-				$reason = 'Missing Core Courses. May need to speak with an Advisor';	
-				break;
-			case 2:
-				$gpa = $ret['GPA'];
-				$reason = "GPA is Below the one needed to Graduate. Current: $gpa";
-				break;
-			case 3:
-				$lessThanBCount = $ret['lessThanBCount'];
-				$reason = "Too many courses with a below B Avg. Currently: $lessThanBCount";
-				break;
-			case 4:
-				$reason = "Unmet Conditions. Student needs to take course(s) Listed:<br>";
-				foreach($ret['conditions'] as $value) { // Append the list of reasons.
-							$reason .= $value."<br>";
-				}	 	
-				break;
-			default:
-				$reason = "Unknown reason. The universe doesn't want this for you.";
-				break;
+		foreach ($ret['reason'] as $key) {
+			switch($key){
+				case 0:
+					$missingCredits = 30 - $ret['totalCredits'];
+					$reason .= "Has not amassed needed total credits. Missing: $missingCredits credits<br>";
+					break;
+				case 1:
+					$reason .= 'Missing Core Courses. May need to speak with an Advisor<br>';	
+					break;
+				case 2:
+					$gpa = $ret['GPA'];
+					$reason .= "GPA is Below the one needed to Graduate. Current: $gpa<br>";
+					break;
+				case 3:
+					$lessThanBCount = $ret['lessThanBCount'];
+					$reason .= "Too many courses with a below B Avg. Currently: $lessThanBCount<br>";
+					break;
+				case 4:
+					$reason .= "Unmet Conditions. Student needs to take course(s) Listed:<br>";
+					foreach($ret['conditions'] as $value) { // Append the list of reasons.
+								$reason .= $value."<br>";
+					}	 	
+					break;
+				default:
+					$reason .= "Unknown reason. The universe doesn't want this for you.<br>";
+					break;
+			}
 		}
-		$reason = "<b>Student is unable to Graduate</b><br>".$reason;
+		$reason = "<b>Student is unable to Graduate due to:</b><br>".$reason;
 	}
 
-	echo $reason."<br>";
+	echo $reason; // Reasons why echo's should be left in HTML side not in functions...
+	$ret['canThey'] = $reason;
 	return $ret; // Just in case something else is needed. 
 }
 
@@ -189,29 +193,30 @@ function canIGraduate($sid){
 	$sidArray = studentGPA($sid);
 	$returnArray = array(
 		'canI' => False,
-		'reason' => -1,
+		'reason' => NULL,
+		'canThey' => '',
 		'conditions' => array(),
 		'totalCredits' => $sidArray['totalCredits'],
 		'GPA' =>$sidArray['GPA'],
 		'lessThanBCount' => $sidArray['lessThanBCount'],
 		'letterGrade' => $sidArray['letterGrade']);
 	$conditionsMet = checkConditions($sid);	
-	$reason = 0;
+	$reason = array();
 
-	if($sidArray['totalCredits'] >= 30){ 
-		$reason++;
-		if($sidArray['coreTaken'] >=4){ // If this and above met, 12 Credits / 18 Credits satisfied.
-			$reason++;
-			if($sidArray['GPA'] >= 3.0){
-				$reason++;
-				if($sidArray['lessThanBCount'] <= 2){
-					$reason++; 
-					if($conditionsMet['met'])
-						$returnArray['canI'] = True;
-				}
-			}		
-		}					
-	}
+// Catalogue all the reasons they can't pass
+	if($sidArray['totalCredits'] < 30)
+		array_push($reason, 0);
+	if($sidArray['coreTaken'] < 4)
+		array_push($reason, 1);
+	if($sidArray['GPA'] < 3.0)
+		array_push($reason, 2);
+	if($sidArray['lessThanBCount'] > 2)
+		array_push($reason, 3);
+	if(!$conditionsMet['met'])
+		array_push($reason, 4);
+	if(empty($reason)) // No reasons found, they can graduate.
+		$returnArray['canI'] = True;
+
 	$returnArray['reason'] = $reason;
 	$returnArray['conditions'] = $conditionsMet['classesMissing'];
 	return $returnArray;
