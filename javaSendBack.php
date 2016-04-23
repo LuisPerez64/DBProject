@@ -65,6 +65,8 @@ echo "<form method='POST' id='retForm'>
 				<input type=hidden value=$return>
 		</form> 
 	<script>
+	setTimeout(function() {
 	document.getElementById('retForm').submit();
+	}, 500);
 	</script>";
 ?>
