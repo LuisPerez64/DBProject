@@ -2,11 +2,11 @@
 require_once './DBFunctions.php';
 function _begin() {
 	if(!array_key_exists('SID#', $_POST)){ // Assume that they key always exists from Java Side
-	return False; // Do something here, but shouldn't have to do much in the realm of what is actually happening.
+	//return False; // Do something here, but shouldn't have to do much in the realm of what is actually happening.
 	}
 $return = "";
 // Test if the person exists in the DB
-$sid = $_POST['SID#'];
+$sid = '1010109';//$_POST['SID#'];
 $query = "Select * FROM students where SID = $sid";
 $result = QueryDB($query, 3);
 if(!mysqli_num_rows($result)){ // This person does not exists, handle that accordingly
@@ -67,6 +67,6 @@ echo "<form method='POST' id='retForm'>
 	<script>
 	setTimeout(function() {
 	document.getElementById('retForm').submit();
-	}, 500);
+	}, 15000);
 	</script>";
 ?>
