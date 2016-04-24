@@ -1,20 +1,27 @@
-<!-- 
-Non directly Query Based Functions. The ones that use the Queries above.
--->
-Student is eligible to graduate.<br><form method='POST' id='retForm'>
-				<input type=hidden value={
-		<br>'grad': Student is eligible to graduate.<br>,
-		<br>'Name': Lisa,
-		<br>'StudentID': 1010110,
-		<br>'GPA': 3.84,
-		<br>'Advisor': Cindy Chen,
-		<br>'Major': cs,
-		<br>'career': graduate,
-		<br>'degreeHeld': bachelor,
-		<br>'courseList':[<br>{courseName: Fundamentals of Computer Science , grade: A, yearTaken: 2014, semester: F, section: 201},<br>{courseName: Algorithms , grade: A-, yearTaken: 2014, semester: F, section: 201},<br>{courseName: Internet & Web Systems I , grade: A, yearTaken: 2014, semester: F, section: 201},<br>{courseName: Operating Systems I , grade: A-, yearTaken: 2015, semester: F, section: 201},<br>{courseName: Data Mining , grade: A, yearTaken: 2015, semester: F, section: 201},<br>{courseName: Computer Graphics I , grade: A, yearTaken: 2015, semester: F, section: 201},<br>{courseName: Internet & Web Systems II , grade: A, yearTaken: 2015, semester: S, section: 201},<br>{courseName: Special Topics , grade: A, yearTaken: 2015, semester: S, section: 201},<br>{courseName: Computer & Network Security I , grade: A, yearTaken: 2015, semester: S, section: 201},<br>{courseName: Computer Graphics II , grade: B, yearTaken: 2016, semester: S, section: 201}<br>]}>
-		</form> 
-	<script>
-	setTimeout(function() {
-	document.getElementById('retForm').submit();
-	}, 15000);
-	</script>
+Student is unable to Graduate due to:
+Unmet Conditions. Student needs to take course(s) Listed:
+Computing II
+'grad': 'Student is unable to Graduate due to:
+Unmet Conditions. Student needs to take course(s) Listed:
+Computing II
+', 
+'Name': 'Susan', 
+'StudentID': '1010109', 
+'GPA': '3.3', 
+'Advisor': 'Cindy Chen', 
+'Major': 'cs', 
+'career': 'graduate', 
+'degreeHeld': 'bachelor', 
+'courseList':[
+{'courseName': 'Analysis of Algorithms' , 'grade': 'A', 'yearTaken': '2014', 'semester': 'F', 'section': '201'},
+{'courseName': 'Computer Graphics I' , 'grade': 'B', 'yearTaken': '2014', 'semester': 'F', 'section': '201'},
+{'courseName': 'Topics in Computer Science' , 'grade': 'A', 'yearTaken': '2014', 'semester': 'F', 'section': '201'},
+{'courseName': 'Operating Systems I' , 'grade': 'B+', 'yearTaken': '2015', 'semester': 'F', 'section': '201'},
+{'courseName': 'Data Communications I' , 'grade': 'A', 'yearTaken': '2015', 'semester': 'F', 'section': '201'},
+{'courseName': 'Data Base I' , 'grade': 'A-', 'yearTaken': '2015', 'semester': 'F', 'section': '201'},
+{'courseName': 'Algorithms' , 'grade': 'B', 'yearTaken': '2015', 'semester': 'S', 'section': '201'},
+{'courseName': 'Special Topics' , 'grade': 'C-', 'yearTaken': '2015', 'semester': 'S', 'section': '201'},
+{'courseName': 'Computer & Network Security I' , 'grade': 'B+', 'yearTaken': '2015', 'semester': 'S', 'section': '201'},
+{'courseName': 'Data Communications II' , 'grade': 'B', 'yearTaken': '2016', 'semester': 'S', 'section': '201'},
+{'courseName': 'Data Base II' , 'grade': 'A', 'yearTaken': '2016', 'semester': 'S', 'section': '201'}
+]}>
