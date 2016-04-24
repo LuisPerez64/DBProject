@@ -149,7 +149,7 @@ function eligibleToGraduate($sid){ // Directly relayed to the user. Done here to
 	$ret = canIGraduate($sid);
 	$reason = '';
 	if($ret['canI']){ // Student Can Graudate
-		$reason = "Student is eligible to graduate.<br>";
+		$reason = "Student is eligible to graduate.";
 	}else {
 		foreach ($ret['reason'] as $key) {
 			switch($key){
@@ -182,7 +182,7 @@ function eligibleToGraduate($sid){ // Directly relayed to the user. Done here to
 		$reason = "<b>Student is unable to Graduate due to:</b><br>".$reason;
 	}
 
-	echo $reason; // Reasons why echo's should be left in HTML side not in functions...
+	//echo $reason; // Reasons why echo's should be left in HTML side not in functions...
 	$ret['canThey'] = $reason;
 	return $ret; // Just in case something else is needed. 
 }
@@ -605,8 +605,3 @@ function whoCanGraduate(){
 }
 
 ?>
-
-
-<!-- 
-Non directly Query Based Functions. The ones that use the Queries above.
--->

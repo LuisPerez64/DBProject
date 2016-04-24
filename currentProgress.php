@@ -82,6 +82,12 @@ require_once('./DBFunctions.php');
                   <th>Scholastic Career</th>
                   <td>$career</td>
                 </tr>
+                <tr>
+                	<th>Grauation Eligibility:</th>
+                </tr>
+                <tr>
+                	<td>$gpa[canThey]</td>
+                </tr>	
               </table>
               <button id = 'backToOps' class='float-left submit-button'>
               Return To Student Operations
