@@ -44,17 +44,25 @@ require_once('./DBFunctions.php');
 							}
 							else { // SID in DB Student Exists Display Data
 								findRetakes($sid);
-									}
+								}
 						}else { // First Time Around ask for SID
+							$query = "SELECT name, students.sid from students, enrollment
+							WHERE students.sid = enrollment.sid AND enrollment.grade = 'NA'";
+							//echo $query;
+						$ret = QueryDB($query, 3);
+						$out="<select name=SID#><option/> ";
+						while($row = mysqli_fetch_array($ret)){
+							$out.="<option value=$row[sid]>$row[name]</option>";
+						}
+						$out .= "</select>";
 						echo "
-						<p>Please Input the Students ID# which you wish to insert new grades for</p>
-						<form action='./insertGrades.php' method = 'post'>
-							SID <input type='text' name='SID#'>
-							<br>
-							<input type='submit' value='Get Info'>
+						<p>Please Input the Students ID# which you wish to view the progress of</p>
+						<form method='post'>
+							$out
+							<input type=submit value='Input Grades/>	
 						</form>
 						";
-						}
+					}
 						?>
 					</div>
 					<div id="footer"><a href="http://www.aszx.net">Template Developed</a> by <a href="http://www.bryantsmith.com">bryant smith</a></div>

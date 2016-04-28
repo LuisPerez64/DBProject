@@ -7,11 +7,14 @@ require_once './DBFunctions.php';
 		updateGrades($sid, $key, $value);
 	}
 	echo "<h2>Update Complete. Heading to current Progress</h2> 
+	<form action='currentProgress.php' method=POST id=submitMe>
+		<input type=hidden value=$sid name='SID#'/>
+	</form>
 	<script>
 	function wait3Secs(){
-		location.href = './currentProgress.php';
+    	document.getElementById('submitMe').submit(); // SUBMIT FORM
 	}
-	setTimeout(wait3Secs, 3000);
+	setTimeout(wait3Secs, 1500);
 	</script>";
 
 		//echo $key."  ".$value."<br>";

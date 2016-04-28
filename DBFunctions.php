@@ -417,7 +417,59 @@ $query =
 
   return $result;  
 }
+function displayCourseList($sid){
+	// Attain all the courses that could be taken, as of the time of the insertion
+	$query = "SELECT DISTINCT courses.name as cName, courses.CID as CID FROM courses";
+	// Does not in any way care about semester taken, just the grade in it.
+	$ret=QueryDB($query, 3);
+	$gradesBox = "
+		<option value='NA'>NA</option>
+	 	<option value='A'>A</option>
+	 	<option value='A-'>A-</option>
+	 	<option value='B+'>B+</option>
+	 	<option value='B'>B</option>
+	 	<option value='B-'>B-</option>
+	 	<option value='C+'>C+</option>
+	 	<option value='C'>C</option>
+	 	<option value='C-'>C-</option>
+	 	<option value='D+'>D+</option>
+	 	<option value='D'>D</option>
+	 	<option value='D-'>D-</option>
+	 	<option value='F'>F</option>
+	 	</select>";
+	$year = date('Y');	
+	$secID = '000';
+	$sem = 'T';
+	$out = "		
+	<form action='./enrollInCourseHelper.php' method=POST>
+	<table border>
+		<tr>
+			<input type=hidden value='NoMa' name='fromNew'/>
+			<input type=hidden value=$sid name='SID'/>
+			<input type=hidden value=$secID name='secID'/>
+			<input type=hidden value=$sem name='sem'/>
+			<th>Enroll</th>
+			<th>Course Name</th>
+			<th>Course ID#</th>
+		</tr>";
+	//Todo	Integrate <--! '<td>$_gradesBox</td>' >
+	while($row = mysqli_fetch_array($ret)){
+		$send= base64_encode(serialize($row)); // Encode the data to be sent.
+		$cName = $row['cName']; $cID = $row['CID'];
+		$_gradesBox = "<select name=$cID>$gradesBox"; 
+		$out .= "<tr>
+		<td><input type='checkbox' name=enroll[] value=$send/></td>
+		<td>$cName</td>
+		<td>$cID</td> 
+		</tr>";
+		//echo base64_decode($send);
+	}
+	$out .= "</table>
+	<input type=submit value='Bring In Transcript Courses'>
+	</form>";
 
+	echo $out;	
+}
 //Running into some simple conflicts. Will make better with time, all functions above work as needed.
 function classesAvailable($sid){ // Displays courses that the student can take for a given semester
 	// In HTML. Display see available classes for Year, Semester
@@ -551,7 +603,7 @@ function findRetakes($sid){
 			<tr>
 				<td>$c</td>
 				<td>$name</td>
-				<td>$_gradesBox</d>
+				<td>$_gradesBox</td>
 			</tr>";
 			$c++;
 		}

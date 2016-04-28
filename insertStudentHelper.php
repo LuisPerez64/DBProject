@@ -1,7 +1,6 @@
 <?php
 require_once('./DBFunctions.php');
 ?>
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
@@ -35,41 +34,46 @@ require_once('./DBFunctions.php');
 						$didIAdd = addStudent($_name,$_sid,$_iid,$_major, $_career, $_degreeHeld);
 						$title = "<title>";
 						$body = "<body>";
-							if(!$didIAdd){
-								$title = $title."Was Unable to Add Student. Unique SID Needed.";
-								$body =$body."\n<h1>Was Unable to Add Student. Unique SID Needed.</h1>".
-								"<h2>Please Click Button Below to Return to addition page</h2>";
-								$locationToRedirect = "./insertStudent.php";
-							}else {
-								$title = $title."Student Added Successfully.";
-								$body = $body."\n<h1>Student Added Successfully.</h1>".
-								"<h2>Click Button To go Back to Home page</h2>";
-								$locationToRedirect = "./home.php";
-							}
-							$title = $title."</title>";
+									if(!$didIAdd){
+										$title = $title."Was Unable to Add Student. Unique SID Needed.";
+										$body =$body."\n<h1>Was Unable to Add Student. Unique SID Needed.</h1>".
+										"<h2>Please Click Button Below to Return to addition page</h2>";
+										$locationToRedirect = "./insertStudent.php";
+									}else {
+										$title = $title."Student Added Successfully.";
+										$body = $body."\n<h1>Student Added Successfully.</h1>".
+										"<h2>Click Button To go Back to Home page</h2>";
+										$locationToRedirect = "./home.php";
+									}
+									$title = $title."</title>";
 						$body = $body."\n</body>";
 						echo
 						"
 							<html>
-										<head>
-										$title
-									</head>
-									$body
-									<button id='RedirectWhere' class = 'float-left submit-button'>
-									CLICK ME!!
-									</button>
-									<button id='Insert Another' class = 'float-right submit-button'>
-									Back To Insert
-									</button>
+												<head>
+														$title
+											</head>
+											$body
+											<table>
+													<tr>
+														<td>
+															<form method=POST action='insertNewTranscript.php'>
+																	<input type='hidden' name='SID#' value='$_sid'/>
+																	<input type=submit value='Import New Transcript'/>
+															</form>
+														</td>
+														<td></td>
+														<td><button id='Insert Another' class = 'float-right'>
+																Back To Insert
+															</button>
+														</td>
+													</tr>
+											</table>
 							<script type='text/javascript'>
-							document.getElementById('RedirectWhere').onclick = function () {
-								location.href = '$locationToRedirect';
-							};
 							document.getElementById('Insert Another').onclick = function() {
 								location.href = './insertStudent.php'
 							};
 							</script>
-
 						</html>
 						"
 						?>

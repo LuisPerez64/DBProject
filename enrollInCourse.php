@@ -21,7 +21,7 @@ require_once('./DBFunctions.php');
 				
 				<div id="blueBox">
 					<div id="header"></div>
-					<div class="contentTitle">Enroll Student</div>
+					<div class="contentTitle">Enroll Student in Course(s)</div>
 					<div class="pageContent">
 						<?php
 						if (array_key_exists('SID#',$_POST)){
@@ -48,12 +48,19 @@ require_once('./DBFunctions.php');
 							classesAvailable($sid);
 							}
 						}else { // First Time Around ask for SID
+								$query = "SELECT name, sid from students";
+						$ret = QueryDB($query, 3);
+						$out="<select name=SID#><option/> ";
+						while($row = mysqli_fetch_array($ret)){
+							$out.="<option value=$row[sid]>$row[name]</option>";
+						}
+						$out .= "</select>";
+
 						echo "
-						<p>Please Input the Students ID# which you wish to alter the Data of.</p>
-						<form action='./enrollInCourse.php' method = 'post'>
-							SID <input type='text' name='SID#'>
-							<br>
-							<input type='submit' value='Get Info'>
+						<p>Please Input the Students ID# which you wish to view the progress of</p>
+						<form method='post'>
+							$out
+							<input type=submit value='Enroll Student In Courses'/>	
 						</form>
 						";
 						}
